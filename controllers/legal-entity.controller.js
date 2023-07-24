@@ -140,13 +140,40 @@ module.exports.updateSupportingDocument = async (req, res, next) => {
         .json({ status: "error", message: "entity not found" });
     }
     if (name) entity.supportingDocuments.id(documentId).name = name;
-    if (url) entity.supportingDocuments.id(documentId).url = url;
+    if (url) {
+      deleteFile(entity.supportingDocuments.id(documentId).url);
+      entity.supportingDocuments.id(documentId).url = url;
+    }
 
     await entity.save();
     return res.status(200).json({
       status: "success",
       message: "document updated",
-      entity,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.deleteSupportingDocument = async (req, res, next) => {
+  try {
+    const { documentId } = req?.params;
+    const entity = await LegalEntity.findOne({ user: req?.user?._id });
+    if (!entity)
+      return res
+        .status(400)
+        .json({ status: "error", message: "entity not found" });
+
+    deleteFile(entity.supportingDocuments.id(documentId).url);
+    entity.supportingDocuments.forEach((doc, index) => {
+      if (doc._id.toString() === documentId) {
+        entity.supportingDocuments.splice(index, 1);
+      }
+    });
+    await entity.save();
+    return res.status(200).json({
+      status: "success",
+      message: "document deleted",
     });
   } catch (err) {
     next(err);

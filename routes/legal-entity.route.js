@@ -1,5 +1,5 @@
 const express = require("express");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 
 const validateReq = require("../middlewares/validate-req");
 const {
@@ -8,6 +8,7 @@ const {
   fetchLegalEntity,
   addSupportingDocument,
   updateSupportingDocument,
+  deleteSupportingDocument,
 } = require("../controllers/legal-entity.controller");
 const { isUser, isAdmin } = require("../middlewares/auth.middleware");
 const { pdfUpload } = require("../middlewares/pdf-upload.middleware");
@@ -92,6 +93,18 @@ router.put(
   updateSupportingDocument
 );
 
+router.delete(
+  "/documents/:documentId",
+  isUser,
+  [
+    param("documentId")
+      .isMongoId()
+      .withMessage("invalid document Id")
+      .notEmpty()
+      .withMessage("document Id required"),
+  ],
+  deleteSupportingDocument
+);
 router.get("/", isUser, fetchLegalEntity);
 
 module.exports = router;
