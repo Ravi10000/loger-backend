@@ -48,5 +48,11 @@ module.exports.isUser = (req, res, next) => {
 };
 
 module.exports.isAdmin = (req, res, next) => {
-  // const user =
+  console.log({ user: req.user });
+  if (req?.user?.usertype === "admin") next();
+  else
+    next({
+      status: 403,
+      explicitMessage: "unauthorized",
+    });
 };

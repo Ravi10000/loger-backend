@@ -17,6 +17,7 @@ const legalEntitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      unique: true,
     },
     entityType: {
       type: String,
@@ -27,7 +28,6 @@ const legalEntitySchema = new mongoose.Schema(
       type: String,
       enum: ["added", "verified"],
     },
-    ICENumber: String,
     supportingDocuments: [documentSchema],
     verifiedAt: {
       type: Date,
@@ -37,6 +37,7 @@ const legalEntitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    ICENumber: String,
     bankName: String,
     bankAccountNumber: String,
     accountHolderName: String,
