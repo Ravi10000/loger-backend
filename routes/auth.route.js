@@ -1,13 +1,15 @@
 const express = require("express");
 const {
   generatePhoneOtp,
-  registerUser,
-  verifyPhone,
-  verifyUser,
-  loginUser,
+  registerUserWithEmail,
+  verifyUserPhone,
+  verifyUserEmail,
+  loginUserEmail,
+  updateUserDetails,
 } = require("../controllers/auth.controller");
 const { body } = require("express-validator");
 const validateReq = require("../middlewares/validate-req");
+const { isUser } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
@@ -18,6 +20,7 @@ router.post(
   validateReq,
   generatePhoneOtp
 );
+
 router.post(
   "/",
   [
@@ -50,7 +53,7 @@ router.post(
       .withMessage("password is required"),
   ],
   validateReq,
-  registerUser
+  registerUserWithEmail
 );
 
 // verify otp
@@ -62,10 +65,12 @@ router.put(
       .isLength({ max: 6, min: 6 })
       .withMessage("otp length should be 6 digits")
       .isNumeric()
-      .withMessage("invalid otp"),
+      .withMessage("invalid otp")
+      .notEmpty()
+      .withMessage("otp required"),
   ],
   validateReq,
-  verifyPhone
+  verifyUserPhone
 );
 router.put(
   "/",
@@ -74,15 +79,17 @@ router.put(
       .isEmail()
       .withMessage("invalid email address")
       .notEmpty()
-      .withMessage("email is required"),
+      .withMessage("email required"),
     body("otp")
       .isLength({ max: 6, min: 6 })
       .withMessage("otp length should be 6 digits")
       .isNumeric()
-      .withMessage("invalid otp"),
+      .withMessage("invalid otp")
+      .notEmpty()
+      .withMessage("otp required"),
   ],
   validateReq,
-  verifyUser
+  verifyUserEmail
 );
 
 router.post(
@@ -96,7 +103,9 @@ router.post(
     body("password").notEmpty().withMessage("password required"),
   ],
   validateReq,
-  loginUser
+  loginUserEmail
 );
+
+router.put("/details", isUser, updateUserDetails);
 
 module.exports = router;

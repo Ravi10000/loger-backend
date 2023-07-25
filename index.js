@@ -30,6 +30,7 @@ mongoose.connection.once("open", () => {
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/legal-entity", require("./routes/legal-entity.route"));
 app.use("/api/house-rules", require("./routes/house-rule.route"));
+app.use("/api/facilities", require("./routes/facility.route"));
 
 app.get("/", (_, res) => res.send("👋 welcome to the api"));
 app.use(errorHandler);

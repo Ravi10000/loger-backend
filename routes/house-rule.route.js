@@ -9,6 +9,10 @@ const {
   deleteHouseRule,
 } = require("../controllers/house-rule.controller");
 const validateReq = require("../middlewares/validate-req");
+const {
+  checkPropertyType,
+  checkStatus,
+} = require("../utils/custom-validators");
 
 const router = express.Router();
 
@@ -42,7 +46,6 @@ router.put(
       .withMessage("invalid rule id")
       .notEmpty()
       .withMessage("rule id required"),
-    body("rule").optional(),
     body("propertyType").optional().toLowerCase().custom(checkPropertyType),
     body("status").optional().toLowerCase().custom(checkStatus),
   ],
@@ -60,6 +63,17 @@ router.get(
   validateReq,
   fetchHouseRuleById
 );
+router.get(
+  "/",
+  isUser,
+  [
+    query("status").optional().custom(checkStatus),
+    query("propertyType").optional().custom(checkPropertyType),
+  ],
+  validateReq,
+  fetchHouseRules
+);
+
 router.delete(
   "/:id",
   isUser,
@@ -72,26 +86,4 @@ router.delete(
   deleteHouseRule
 );
 
-router.get(
-  "/",
-  isUser,
-  [
-    query("status").optional().custom(checkStatus),
-    query("propertyType").optional().custom(checkPropertyType),
-  ],
-  validateReq,
-  fetchHouseRules
-);
-
 module.exports = router;
-
-function checkPropertyType(value) {
-  if (!["hotel", "apartment"].includes(value))
-    throw new Error("property type can be either hotel or apartment");
-  return true;
-}
-function checkStatus(value) {
-  if (!["active", "inactive"].includes(value))
-    throw new Error("status can be either active or inactive");
-  return true;
-}

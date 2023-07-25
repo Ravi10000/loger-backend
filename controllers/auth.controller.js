@@ -26,7 +26,7 @@ module.exports.generatePhoneOtp = async (req, res, next) => {
     next(err);
   }
 };
-module.exports.registerUser = async (req, res, next) => {
+module.exports.registerUserWithEmail = async (req, res, next) => {
   const { email, name, phone, password } = req.body;
   try {
     let userExists = await User.exists({ email });
@@ -56,7 +56,7 @@ module.exports.registerUser = async (req, res, next) => {
 };
 
 // verify otp
-module.exports.verifyPhone = async (req, res, next) => {
+module.exports.verifyUserPhone = async (req, res, next) => {
   const { phone, otp } = req.body;
 
   try {
@@ -101,7 +101,7 @@ module.exports.verifyPhone = async (req, res, next) => {
   }
 };
 
-module.exports.verifyUser = async (req, res, next) => {
+module.exports.verifyUserEmail = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
     const verificationRequest = await VerificationRequest.findOne({
@@ -142,7 +142,7 @@ module.exports.verifyUser = async (req, res, next) => {
   }
 };
 
-module.exports.loginUser = async (req, res, next) => {
+module.exports.loginUserEmail = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select(
@@ -173,6 +173,27 @@ module.exports.loginUser = async (req, res, next) => {
       status: "success",
       message: "login successful",
       accessToken,
+      user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.updateUserDetails = async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        ...(name && { name }),
+      },
+      { new: true }
+    );
+    if (!user) throw new Error("user not found", { cause: { status: 404 } });
+    res.status(200).json({
+      status: "success",
+      message: "user updated",
       user,
     });
   } catch (err) {

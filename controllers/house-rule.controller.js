@@ -19,15 +19,20 @@ module.exports.addHouseRule = async (req, res, next) => {
     next(err);
   }
 };
+
 module.exports.updateHouseRule = async (req, res, next) => {
   try {
     console.log(req.body);
     const { rule, propertyType, status, ruleId } = req.body;
-    const houseRule = await HouseRule.findByIdAndUpdate(ruleId, {
-      ...(rule && { rule }),
-      ...(propertyType, { propertyType }),
-      ...(status, { status }),
-    });
+    const houseRule = await HouseRule.findByIdAndUpdate(
+      ruleId,
+      {
+        ...(rule && { rule }),
+        ...(propertyType, { propertyType }),
+        ...(status, { status }),
+      },
+      { new: true }
+    );
     if (!houseRule)
       throw new Error("house rule not found", { cause: { status: 404 } });
     res.status(201).json({
@@ -71,11 +76,12 @@ module.exports.fetchHouseRuleById = async (req, res, next) => {
     next(err);
   }
 };
+
 module.exports.deleteHouseRule = async (req, res, next) => {
   try {
     const houseRule = await HouseRule.findByIdAndDelete(req.params.id);
     if (!houseRule)
-      throw new Error("error deleting rule", { cause: { status: 404 } });
+      throw new Error("rule not found", { cause: { status: 404 } });
     res.status(200).json({
       success: "success",
       message: "rule deleted",
