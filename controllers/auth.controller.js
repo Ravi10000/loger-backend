@@ -31,8 +31,7 @@ module.exports.registerUser = async (req, res, next) => {
   try {
     let userExists = await User.exists({ email });
     userExists = userExists || (await User.exists({ phone }));
-    if (userExists)
-      return res.status(400).json({ status: "error", message: "user exists" });
+    if (userExists) throw new Error("user exists", { cause: { status: 400 } });
 
     const otp = await generateOtp();
     console.log({ otp });
@@ -67,32 +66,19 @@ module.exports.verifyPhone = async (req, res, next) => {
     }).sort({ createdAt: -1 });
 
     if (!verificationRequest)
-      return res.status(400).json({
-        status: "error",
-        message: "invalid request",
-      });
+      throw new Error("invalid request", { cause: { status: 400 } });
 
     const isMatch = await bcrypt.compare(otp, verificationRequest.otpHash);
-    if (!isMatch)
-      return res.status(400).json({
-        status: "error",
-        message: "incorrect otp",
-      });
+    if (!isMatch) throw new Error("incorrect otp", { cause: { status: 400 } });
 
     if (verificationRequest.isUsed)
-      return res.status(400).json({
-        status: "error",
-        message: "otp already used",
-      });
+      throw new Error("otp already used", { cause: { status: 400 } });
 
     const isOtpExpired =
       Date.now().valueOf() - verificationRequest.createdAt.valueOf() > 6_00_000; // 10 minutes
 
     if (isOtpExpired)
-      return res.status(400).json({
-        status: "error",
-        message: "otp expired",
-      });
+      throw new Error("otp expired", { cause: { status: 400 } });
 
     let user = await User.findOne({ phone });
     console.log({ user });
@@ -122,39 +108,24 @@ module.exports.verifyUser = async (req, res, next) => {
       value: email,
     }).sort({ createdAt: -1 });
     if (!verificationRequest)
-      return res.status(400).json({
-        status: "error",
-        message: "invalid request",
-      });
+      throw new Error("invalid request", { cause: { status: 400 } });
 
     const isMatch = await bcrypt.compare(otp, verificationRequest.otpHash);
-    if (!isMatch)
-      return res.status(400).json({
-        status: "error",
-        message: "incorrect otp",
-      });
+    if (!isMatch) throw new Error("incorrect otp", { cause: { status: 400 } });
 
     if (verificationRequest.isUsed)
-      return res.status(400).json({
-        status: "error",
-        message: "otp already used",
-      });
+      throw new Error("otp already used", { cause: { status: 400 } });
 
     const isOtpExpired =
       Date.now().valueOf() - verificationRequest.createdAt.valueOf() > 6_00_000; // 10 minutes
 
     if (isOtpExpired)
-      return res.status(400).json({
-        status: "error",
-        message: "otp expired",
-      });
+      throw new Error("otp expired", { cause: { status: 400 } });
     const user = await User.findOneAndUpdate(
       { email },
       { isVerified: true }
     ).select("-hash -createdAt -updatedAt -__v");
     console.log({ user });
-    // user.isVerified = true;
-    // await user.save();
 
     verificationRequest.isUsed = true;
     await verificationRequest.save();
@@ -177,16 +148,11 @@ module.exports.loginUser = async (req, res, next) => {
     const user = await User.findOne({ email }).select(
       "-createdAt -updatedAt -__v"
     );
-    if (!user)
-      return res
-        .status(400)
-        .json({ status: "error", message: "incorrect email" });
+    if (!user) throw new Error("incorrect email", { cause: { status: 400 } });
 
     const isMatch = await bcrypt.compare(password, user.hash);
     if (!isMatch)
-      return res
-        .status(400)
-        .json({ status: "error", message: "incorrect password" });
+      throw new Error("incorrect password", { cause: { status: 400 } });
 
     if (!user.isVerified) {
       // TODO: send otp
@@ -214,6 +180,4 @@ module.exports.loginUser = async (req, res, next) => {
   }
 };
 
-function generateOtp() {
-  return customOtpGen({ length: 6, chars: "0123456789" });
-}
+const generateOtp = () => customOtpGen({ length: 6, chars: "0123456789" });

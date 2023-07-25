@@ -15,9 +15,8 @@ module.exports.addLegalEntity = async (req, res, next) => {
 
     const entityExists = await LegalEntity.exists({ user: req.user._id });
     if (entityExists)
-      return res
-        .status(400)
-        .json({ status: "error", message: "entity exists for this user" });
+      throw new Error("entity already exists", { cause: { status: 400 } });
+
     const entity = await LegalEntity.create({
       user: req.user._id,
       entityType,
@@ -64,9 +63,7 @@ module.exports.updateLegalEntity = async (req, res, next) => {
     );
 
     if (!entity)
-      return res
-        .status(400)
-        .json({ status: "error", message: "entity not found" });
+      throw new Error("entity not found", { cause: { status: 404 } });
     res.status(200).json({
       status: "success",
       message: "entity updated",
@@ -83,9 +80,7 @@ module.exports.fetchLegalEntity = async (req, res, next) => {
       "-__v -createdAt -updatedAt -user"
     );
     if (!entity)
-      return res
-        .status(400)
-        .json({ status: "error", message: "entity not found" });
+      throw new Error("entity not found", { cause: { status: 404 } });
     res.status(200).json({
       status: "success",
       message: "entity sent",
@@ -111,9 +106,7 @@ module.exports.addSupportingDocument = async (req, res, next) => {
     const entity = await LegalEntity.findOne({ user: req?.user?._id });
     if (!entity) {
       deleteFile(url);
-      return res
-        .status(400)
-        .json({ status: "error", message: "entity not found" });
+      throw new Error("entity not found", { cause: { status: 404 } });
     }
     entity.supportingDocuments.push({ name, url });
     await entity.save();
@@ -135,9 +128,7 @@ module.exports.updateSupportingDocument = async (req, res, next) => {
     const entity = await LegalEntity.findOne({ user: req?.user?._id });
     if (!entity) {
       deleteFile(url);
-      return res
-        .status(400)
-        .json({ status: "error", message: "entity not found" });
+      throw new Error("entity not found", { cause: { status: 404 } });
     }
     if (name) entity.supportingDocuments.id(documentId).name = name;
     if (url) {
@@ -160,9 +151,7 @@ module.exports.deleteSupportingDocument = async (req, res, next) => {
     const { documentId } = req?.params;
     const entity = await LegalEntity.findOne({ user: req?.user?._id });
     if (!entity)
-      return res
-        .status(400)
-        .json({ status: "error", message: "entity not found" });
+      throw new Error("entity not found", { cause: { status: 404 } });
 
     deleteFile(entity.supportingDocuments.id(documentId).url);
     entity.supportingDocuments.forEach((doc, index) => {

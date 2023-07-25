@@ -52,6 +52,7 @@ router.post(
 router.put(
   "/",
   isUser,
+  // isAdmin,
   [
     body("entityType")
       .optional()
@@ -70,8 +71,7 @@ router.put(
     body("swiftCode").optional(),
     body("ICENumber").optional(),
   ],
-  isUser,
-  isAdmin,
+
   validateReq,
   updateLegalEntity
 );
