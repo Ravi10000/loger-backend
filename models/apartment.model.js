@@ -6,6 +6,7 @@ const apartmentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Property",
       required: true,
+      unique: true,
     },
     maxGuests: Number,
     bathroomsCount: Number,

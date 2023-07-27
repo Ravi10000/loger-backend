@@ -33,6 +33,7 @@ app.use("/api/house-rules", require("./routes/house-rule.route"));
 app.use("/api/facilities", require("./routes/facility.route"));
 app.use("/api/properties", require("./routes/property.route"));
 app.use("/api/apartments", require("./routes/apartment.route"));
+app.use("/api/hotels", require("./routes/hotel.route"));
 
 app.get("/", (_, res) => res.send("👋 welcome to the api"));
 app.use(errorHandler);

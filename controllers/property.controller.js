@@ -1,6 +1,7 @@
 const LegalEntity = require("../models/legal-entity.model");
 const Property = require("../models/property.model");
 const { imageUpload } = require("../middlewares/image-upload.middleware");
+
 module.exports.addProperty = async (req, res, next) => {
   try {
     const { propertyType, propertyName } = req.body;

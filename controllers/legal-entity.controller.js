@@ -105,7 +105,7 @@ module.exports.addSupportingDocument = async (req, res, next) => {
       });
     const entity = await LegalEntity.findOne({ user: req?.user?._id });
     if (!entity) {
-      pdfUpload._delete(url);
+      deleteFile(url);
       throw new Error("entity not found", { cause: { status: 404 } });
     }
     entity.supportingDocuments.push({ name, url });
