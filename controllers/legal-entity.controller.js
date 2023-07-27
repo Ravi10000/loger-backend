@@ -1,5 +1,5 @@
 const LegalEntity = require("../models/legal-entity.model");
-const { deleteFile } = require("../utils/delete-file");
+const { pdfUpload } = require("../middlewares/pdf-upload.middleware");
 
 module.exports.addLegalEntity = async (req, res, next) => {
   try {
@@ -105,7 +105,7 @@ module.exports.addSupportingDocument = async (req, res, next) => {
       });
     const entity = await LegalEntity.findOne({ user: req?.user?._id });
     if (!entity) {
-      deleteFile(url);
+      pdfUpload._delete(url);
       throw new Error("entity not found", { cause: { status: 404 } });
     }
     entity.supportingDocuments.push({ name, url });
@@ -127,12 +127,12 @@ module.exports.updateSupportingDocument = async (req, res, next) => {
 
     const entity = await LegalEntity.findOne({ user: req?.user?._id });
     if (!entity) {
-      deleteFile(url);
+      pdfUpload._delete(url);
       throw new Error("entity not found", { cause: { status: 404 } });
     }
     if (name) entity.supportingDocuments.id(documentId).name = name;
     if (url) {
-      deleteFile(entity.supportingDocuments.id(documentId).url);
+      pdfUpload._delete(entity.supportingDocuments.id(documentId).url);
       entity.supportingDocuments.id(documentId).url = url;
     }
 
@@ -153,11 +153,16 @@ module.exports.deleteSupportingDocument = async (req, res, next) => {
     if (!entity)
       throw new Error("entity not found", { cause: { status: 404 } });
 
-    deleteFile(entity.supportingDocuments.id(documentId).url);
-    entity.supportingDocuments.forEach((doc, index) => {
-      if (doc._id.toString() === documentId) {
-        entity.supportingDocuments.splice(index, 1);
-      }
+    // pdfUpload._delete(entity.supportingDocuments.id(documentId).url);
+    // entity.supportingDocuments.forEach((doc, index) => {
+    //   if (doc._id.toString() === documentId) {
+    //     entity.supportingDocuments.splice(index, 1);
+    //   }
+    // });
+    entity.supportingDocuments = entity.supportingDocuments.filter((doc) => {
+      const isDoc = doc._id.equals(documentId);
+      if (isDoc) pdfUpload._delete(doc.url);
+      return !isDoc;
     });
     await entity.save();
     return res.status(200).json({

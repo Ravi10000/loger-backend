@@ -1,7 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const uploadPath = path.join(path.dirname(__dirname), "uploads");
+const imagesPath = path.join(path.dirname(__dirname), "uploads/images");
 
 function imageFilter(req, file, cb) {
   const filetype = file.mimetype;
@@ -30,7 +30,7 @@ function imageFilter(req, file, cb) {
 
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadPath + "/images");
+    cb(null, imagesPath);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -38,6 +38,27 @@ const imageStorage = multer.diskStorage({
 });
 
 const imageUpload = multer({ storage: imageStorage, fileFilter: imageFilter });
+imageUpload._delete = (filename) => {
+  try {
+    fs.unlinkSync(`${imagesPath}/${filename}`);
+  } catch (err) {
+    console.log(err.message);
+  }
+};
+imageUpload._handleError = (req, res, next) => {
+  if (!req?.multerError) return next();
+  if (req?.file?.filename) {
+    imageUpload._delete(req?.file?.filename);
+  }
+  if (req?.files?.length)
+    req.files.forEach((file) => {
+      imageUpload._delete(file?.filename);
+    });
+  return res.status(400).json({
+    status: "error",
+    message: req.multerError,
+  });
+};
 
 module.exports.imageUpload = imageUpload;
-module.exports.uploadPath = uploadPath;
+module.exports.imagesPath = imagesPath;

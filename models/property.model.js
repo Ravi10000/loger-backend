@@ -9,11 +9,9 @@ const photoSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  accepted: {
-    type: {
-      type: Boolean,
-      default: false,
-    },
+  isAccepted: {
+    type: Boolean,
+    default: false,
   },
 });
 const geoLocationSchema = new mongoose.Schema(

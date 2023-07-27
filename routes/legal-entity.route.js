@@ -12,7 +12,6 @@ const {
 } = require("../controllers/legal-entity.controller");
 const { isUser, isAdmin } = require("../middlewares/auth.middleware");
 const { pdfUpload } = require("../middlewares/pdf-upload.middleware");
-const { handleUploadError } = require("../middlewares/upload-error-handler");
 
 const router = express.Router();
 
@@ -80,16 +79,16 @@ router.post(
   "/documents",
   isUser,
   pdfUpload.single("document"),
-  handleUploadError,
+  pdfUpload._handleError,
   [body("name").notEmpty().withMessage("document name required")],
-  validateReq,
+  validateReq.withPdf,
   addSupportingDocument
 );
 router.put(
   "/documents",
   isUser,
   pdfUpload.single("document"),
-  handleUploadError,
+  pdfUpload._handleError,
   updateSupportingDocument
 );
 

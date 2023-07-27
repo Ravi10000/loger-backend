@@ -7,11 +7,15 @@ const {
   updateProperty,
   fetchPropertyById,
   fetchMyProperties,
+  addPhoto,
+  deletePhoto,
+  updatePhoto,
 } = require("../controllers/property.controller");
 const {
   validatePropertyType,
   validateGeoLocation,
 } = require("../utils/custom-validators");
+const { imageUpload } = require("../middlewares/image-upload.middleware");
 
 const router = express.Router();
 
@@ -87,6 +91,62 @@ router.put(
   updateProperty
 );
 
-router.get("/my-properties", isUser, fetchMyProperties);
+router.get(
+  "/my-properties",
+  isUser,
+  query("type").optional().custom(validatePropertyType),
+  validateReq,
+  fetchMyProperties
+);
 router.get("/:id", fetchPropertyById);
+
+// photos
+router.post(
+  "/photos",
+  isUser,
+  imageUpload.single("photo"),
+  [
+    body("propertyId").isMongoId().withMessage("invalid property id"),
+    body("isMain").isBoolean().withMessage("isMain can be true or false only"),
+  ],
+  imageUpload._handleError,
+  validateReq.withImage,
+  addPhoto
+);
+router.put(
+  "/photos",
+  isUser,
+  imageUpload.single("photo"),
+  [
+    body("propertyId").isMongoId().withMessage("invalid property id"),
+    body("photoId").isMongoId().withMessage("invalid photo id"),
+    body("isMain")
+      .optional()
+      .isBoolean()
+      .withMessage("isMain can be true or false only"),
+  ],
+  imageUpload._handleError,
+  validateReq.withImage,
+  updatePhoto
+);
+
+router.delete(
+  "/photos/:propertyId/:photoId",
+  isUser,
+  [
+    param("propertyId")
+      .isMongoId()
+      .withMessage("invalid property id")
+      .notEmpty()
+      .withMessage("property id required"),
+    param("photoId")
+      .isMongoId()
+      .withMessage("invalid photo id")
+      .notEmpty()
+      .withMessage("photo id required"),
+  ],
+  validateReq,
+  deletePhoto
+);
+
 module.exports = router;
