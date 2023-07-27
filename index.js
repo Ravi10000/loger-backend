@@ -31,6 +31,8 @@ app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/legal-entity", require("./routes/legal-entity.route"));
 app.use("/api/house-rules", require("./routes/house-rule.route"));
 app.use("/api/facilities", require("./routes/facility.route"));
+app.use("/api/properties", require("./routes/property.route"));
+app.use("/api/apartments", require("./routes/apartment.route"));
 
 app.get("/", (_, res) => res.send("👋 welcome to the api"));
 app.use(errorHandler);

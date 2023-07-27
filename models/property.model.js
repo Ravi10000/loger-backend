@@ -16,6 +16,19 @@ const photoSchema = new mongoose.Schema({
     },
   },
 });
+const geoLocationSchema = new mongoose.Schema(
+  {
+    lat: {
+      type: Number,
+      required: true,
+    },
+    lng: {
+      type: Number,
+      required: true,
+    },
+  },
+  { _id: false }
+);
 
 const PropertySchema = new mongoose.Schema({
   entity: {
@@ -28,18 +41,20 @@ const PropertySchema = new mongoose.Schema({
     enum: ["hotel", "villa", "apartment", "flat"],
     required: true,
   },
+  apartment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Apartment",
+  },
+  hotel: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Hotel",
+  },
   propertyName: String,
   country: String,
   city: String,
   address: String,
   pincode: String,
-  geolocation: {
-    type: Map,
-    of: new Schema({
-      latitude: String,
-      longitude: String,
-    }),
-  },
+  geoLocation: geoLocationSchema,
   breakfastServed: Boolean,
   breakfastIncluded: Boolean,
   breakfastPrice: Number,

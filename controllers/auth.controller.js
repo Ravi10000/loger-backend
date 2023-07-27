@@ -183,6 +183,7 @@ module.exports.loginUserEmail = async (req, res, next) => {
 module.exports.updateUserDetails = async (req, res, next) => {
   try {
     const { name } = req.body;
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {
