@@ -5,11 +5,11 @@ const {
   verifyUserPhone,
   verifyUserEmail,
   loginUserEmail,
+  gAuth,
 } = require("../controllers/auth.controller");
 const { body } = require("express-validator");
 const validateReq = require("../middlewares/validate-req");
 const { isUser } = require("../middlewares/auth.middleware");
-
 const router = express.Router();
 
 // generate otp
@@ -104,5 +104,7 @@ router.post(
   validateReq,
   loginUserEmail
 );
+
+router.post("/google", gAuth);
 
 module.exports = router;

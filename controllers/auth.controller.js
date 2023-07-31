@@ -5,6 +5,8 @@ const User = require("../models/user.model");
 const VerificationRequest = require("../models/verification-request.model");
 
 const { generateToken } = require("../utils/generate-token");
+const { verifyGoogleToken } = require("../utils/verify-google-token");
+const jwt = require("jsonwebtoken");
 
 // generate otp
 module.exports.generatePhoneOtp = async (req, res, next) => {
@@ -174,6 +176,58 @@ module.exports.loginUserEmail = async (req, res, next) => {
       message: "login successful",
       accessToken,
       user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.gAuth = async (req, res, next) => {
+  try {
+    const verificationResponse = await verifyGoogleToken(req.body.credential);
+    if (verificationResponse.error)
+      throw new Error(verificationResponse.error, { cause: { status: 400 } });
+    const profile = verificationResponse?.payload;
+    console.log({ profile });
+    let user = await User.findOne({ googleId: profile?.sub });
+    // {
+    //   profile: {
+    //     iss: 'https://accounts.google.com',
+    //     nbf: 1690786001,
+    //     aud: '120794505569-c78e1eo3hac995ihjd9iu8h5rfklqkar.apps.googleusercontent.com',
+    //     sub: '115965328904069995693',
+    //     email: 'ruravi80@gmail.com',
+    //     email_verified: true,
+    //     azp: '120794505569-c78e1eo3hac995ihjd9iu8h5rfklqkar.apps.googleusercontent.com',
+    //     name: 'Ravi Sharma',
+    //     picture: 'https://lh3.googleusercontent.com/a/AAcHTtcnRGPNor6JGOuD5HUPAs3Ty7AnO8tnmhcwaWMlFy6wp2w=s96-c',    given_name: 'Ravi',
+    //     family_name: 'Sharma',
+    //     iat: 1690786301,
+    //     exp: 1690789901,
+    //     jti: 'df6060e6436951730150c8a5985bbbf10c9318c3'
+    //   }
+    // }
+
+    if (!user) {
+      user = await User.create({
+        name: profile?.given_name + " " + profile?.family_name,
+        googleId: profile?.sub,
+        email: profile?.email,
+        // picture: profile?.picture,
+        isVerified: true,
+      });
+    }
+    res.status(201).json({
+      status: "success",
+      message: "Signup was successful",
+      user: {
+        _id: user?._id,
+        firstName: profile?.given_name,
+        lastName: profile?.family_name,
+        picture: profile?.picture,
+        email: profile?.email,
+        accessToken: generateToken(user),
+      },
     });
   } catch (err) {
     next(err);

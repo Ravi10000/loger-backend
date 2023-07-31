@@ -7,7 +7,12 @@ const cors = require("cors");
 const { errorHandler } = require("./utils/handle-error");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET, POST, PUT, DELETE, HEAD, OPTIONS",
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,7 +30,7 @@ mongoose.connection.once("open", () => {
     console.log(`👉 http://localhost:${process.env.PORT}`);
     console.log(`⚡ http://localhost:${process.env.PORT}/api`);
   });
-});
+}); 
 
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
