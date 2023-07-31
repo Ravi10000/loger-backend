@@ -28,6 +28,7 @@ mongoose.connection.once("open", () => {
 });
 
 app.use("/api/auth", require("./routes/auth.route"));
+app.use("/api/user", require("./routes/user.route"));
 app.use("/api/legal-entity", require("./routes/legal-entity.route"));
 app.use("/api/house-rules", require("./routes/house-rule.route"));
 app.use("/api/facilities", require("./routes/facility.route"));

@@ -5,7 +5,6 @@ const {
   verifyUserPhone,
   verifyUserEmail,
   loginUserEmail,
-  updateUserDetails,
 } = require("../controllers/auth.controller");
 const { body } = require("express-validator");
 const validateReq = require("../middlewares/validate-req");
@@ -105,7 +104,5 @@ router.post(
   validateReq,
   loginUserEmail
 );
-
-router.put("/details", isUser, updateUserDetails);
 
 module.exports = router;

@@ -180,26 +180,4 @@ module.exports.loginUserEmail = async (req, res, next) => {
   }
 };
 
-module.exports.updateUserDetails = async (req, res, next) => {
-  try {
-    const { name } = req.body;
-
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        ...(name && { name }),
-      },
-      { new: true }
-    );
-    if (!user) throw new Error("user not found", { cause: { status: 404 } });
-    res.status(200).json({
-      status: "success",
-      message: "user updated",
-      user,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
 const generateOtp = () => customOtpGen({ length: 6, chars: "0123456789" });
